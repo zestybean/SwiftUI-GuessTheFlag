@@ -8,32 +8,64 @@
 import SwiftUI
 
 struct ContentView: View {
-    var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"]
+    @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
     
-    var correctAnswer = Int.random(in: 0...2)
+    @State private var correctAnswer = Int.random(in: 0...2)
     
-    
-    @State private var showingAlert = false
+    @State private var showingScore = false
+    @State private var scoreTitle = ""
     
     var body: some View {
         ZStack {
-            Color(red: 0.1, green: 0.1, blue: 0.3).edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+            LinearGradient(gradient: Gradient(colors: [Color.blue, Color.black]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
             VStack(spacing: 30) {
                 VStack {
                     Text("Tap the flag of")
+                        .foregroundColor(.white)
+                        .font(.largeTitle)
+                        .fontWeight(.black)
                     Text(countries[correctAnswer])
+                        .foregroundColor(.white)
+                        .font(.title)
+                        .fontWeight(.black)
                 }
-                    .foregroundColor(.white)
+                    
                 ForEach(0..<3){ number in
                     Button(action: {
                         //Flag tapped
+                        self.flagTapped(number)
                     }, label: {
                         Image(self.countries[number])
-                            .renderingMode(.original)     
+                            .renderingMode(.original)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color.black, lineWidth: 2))
+                            .shadow(color: /*@START_MENU_TOKEN@*/.black/*@END_MENU_TOKEN@*/, radius: 2)
+                            
                     })
                 }
+                
+                Spacer()
             }
         }
+        .alert(isPresented: $showingScore, content: {
+            Alert(title: Text(scoreTitle), message: Text("Your score is ???"), dismissButton: .default(Text("Continue"), action: {
+                self.askQuestion()
+            }))
+        })
+    }
+    
+    func flagTapped(_ number: Int){
+        if number == correctAnswer {
+            scoreTitle = "Correct!"
+        } else {
+            scoreTitle = "Wrong!"
+        }
+        showingScore = true
+    }
+    
+    func askQuestion() {
+        countries.shuffle()
+        correctAnswer = Int.random(in: 0...2)
     }
 }
 
